@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='css/w3.css') }}">
+
+    <script src="{{ url_for('static', filename='js/jquery-3.1.0.js') }}"></script>
+
+      <script>
+         $(function() {
+            $( ".datefield" ).datepicker();
+         });
+      </script>
+
+
+</head>
+<body>
+    <div class="w3-container">
+        <nav class="w3-topnav w3-light-blue">
+            MTC CRC | Welcome <b>{{alias}}</b> | 
+            <a href="/logout">Logout</a>
+        </nav>
+    </div> 
+
+<div class="w3-container">
+    <div class="w3-col s2">&nbsp;</div>
+    <div class="w3-col s7">
+
+        <h3>Copy Edit - Ontime Status</h3>
+
+        <table class="w3-table-all w3-small">
+           <thead>
+                <tr>
+                    {% for item in headers -%}
+                        <th>{{ item }}</th>
+                    {%- endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in data %}
+                    <tr>
+                        <form name="input" action="{{ url_for('CE.CEDOntime') }}" method="get">
+                            <input type="hidden" name="updatebook" value="{{ row.book }}">
+                            <td>{{ row.book }}</td>
+                            <td>{{ row.pages }}</td>
+                            <td>{{ row.CE }}</td>
+                            <td>{{ row.due }}</td>
+                            <td><input id="comment{{ row.book }}" type="text" name="comment" value="{{ row.comment }}" style="width:40em"></td>
+                            <td><input type="submit" value="Update"></td>
+                        </form>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="w3-col s3">&nbsp;</div>
+
+</div>
+
+</body>
+</html>

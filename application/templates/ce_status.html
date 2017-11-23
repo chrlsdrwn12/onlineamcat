@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CopyEditTable</title>
+    <style>
+        nav, div {
+            -webkit-box-sizing: border-box;
+               -moz-box-sizing: border-box;
+                    box-sizing: border-box;
+        }
+        nav {
+            height:40px;
+            border-radius: 8px;
+            font-size: x-large;
+            line-height: 40px;
+            margin: 0px 20px;
+        }
+        .container {
+            margin: 0 auto;
+            padding-left: 30px;
+            padding-right: 30px;
+            width: 1400px;
+        }
+
+        table {
+          border-collapse: collapse;
+        }
+        th,
+        td {
+          border: 1px solid #cecfd5;
+          padding: 2px 5px;
+          height:20px;
+          font-size: medium;
+          text-align: center;
+        }
+        .medium {
+            font-size: medium;
+        }
+
+
+        .graph-outer {
+            background: black;
+            height: 20px;
+            /*width: 150px;*/
+            border: 1px solid black;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .inner-missed {
+            background: red;
+            height: 100%;
+            float: left;
+        }
+
+        .inner-used {
+            background: green;
+            height: 100%;
+            float: left;
+        }
+
+        .inner-available {
+            background: gray;
+            height: 100%;
+            float: left;
+        }
+
+    </style>
+    <script src="{{ url_for('static', filename='js/jquery-3.1.0.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/jquery.tablesorter.min.js') }}"></script>
+    <script>
+        $(document).ready(function() {
+            $("#CETable").tablesorter();
+            $('#CETable').on('click', 'tbody td', function () {
+                //get textContent of the TD
+                if (this.cellIndex == 0) {
+                    var Something = this.textContent;
+                    var catno = Something.split('_')[0];
+                    //alert(catno);
+                    window.location.href = "/bookedit?catno1=" + catno + "&backurl=/CE/status";
+                }
+                ;
+            }); // on click
+        });
+    </script>
+
+</head>
+<body>
+    <nav class="container" style="background-color:#CCCCCC">
+        T&F Books - Status
+         <a href="/">Home</a>
+         <a href="/CE/status" style="float:right">Refresh</a>
+    </nav>
+    <div class="container">
+        <table id="CETable" style="margin: 20px">
+            <thead>
+                <tr>
+                    <th colspan="6"></th>
+                    <th>Actual</th>
+                    <th colspan="2"></th>
+                    <th colspan="2">Completed</th>
+                    <th colspan="2">Remaining</th>
+                    <th>Used</th>
+                    <th>Remaining</th>
+                    <th>Initial</th>
+                    <th>Required</th>
+                    <th colspan="2"></th>
+                </tr>
+                <tr>
+                    <th>Book</th>
+                    <th>Editor</th>
+                    <th>Pages</th>
+                    <th>Chptrs</th>
+                    <th>Compx</th>
+                    <th>Ready</th>
+                    <th>Start</th>
+                    <th>Due</th>
+                    <th>Days</th>
+                    <th>Pages</th>
+                    <th>Chptrs</th>
+                    <th>Pages</th>
+                    <th>Chptrs</th>
+                    <th>Days</th>
+                    <th>Days</th>
+                    <th>Speed</th>
+                    <th>Speed</th>
+                    <th>Queries</th>
+                    <th>Timeframe</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in data %}
+                    <tr>
+                        {% for cell in row %}
+                            {% if cell.value is defined %}
+                                <td{{ cell.attributes|safe }}>{{ cell.value }}</td>
+                            {%  else %}
+                                <!--
+                                <td>
+                                    <div class="graph-outer" style="width: {{ cell.length }}px">
+                                        <div class="inner-missed" style="width: {{ cell.missed }}%"></div>
+                                        <div class="inner-used" style="width: {{ cell.used }}%"></div>
+                                        <div class="inner-available" style="width: {{ cell.available }}%"></div>
+                                        <div class="inner-missed" style="width: {{ cell.late }}%"></div>
+                                    </div>
+                                </td> -->
+                                <td>
+                                    <svg width="{{ cell.box_len }}" height="20" style="float:left">
+                                        <rect x = "{{ cell.missed_x }}" y = "0" width="{{ cell.missed_len }}" height="18" style="fill:orange;stroke-width:1;stroke:orange" />
+                                        <rect x = "{{ cell.used_x }}" y = "0" width="{{ cell.used_len }}" height="18" style="fill:green;stroke-width:1;stroke:green" />
+                                        <rect x = "{{ cell.available_x }}" y = "0" width="{{ cell.available_len }}" height="18" style="fill:gray;stroke-width:1;stroke:gray" />
+                                        <rect x = "{{ cell.late_x }}" y = "0" width="{{ cell.late_len }}" height="18" style="fill:red;stroke-width:1;stroke:red" />
+                                    </svg>
+                                </td>
+                            {% endif %}
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <p id="debug">Updated:</p>
+        <div>
+            <table>
+                <thead>
+                    <tr><th>Color</th><th>Status</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <svg width="20" height="20">
+                                <rect x = "0" y = "0" width="20" height="20" style="fill:orange;stroke-width:1;stroke:orange" />
+                            </svg>
+                        </td>
+                        <td>Not assigned to editor</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <svg width="20" height="20">
+                                <rect x = "0" y = "0" width="20" height="20" style="fill:green;stroke-width:1;stroke:green" />
+                            </svg>
+                        </td>
+                        <td>Being edited</td>
+                    </tr>
+                    <tr>    
+                        <td>
+                            <svg width="20" height="20">
+                                <rect x = "0" y = "0" width="20" height="20" style="fill:gray;stroke-width:1;stroke:gray" />
+                            </svg>
+                        </td>
+                        <td>Days to Due Date</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <svg width="20" height="20">
+                                <rect x = "0" y = "0" width="20" height="20" style="fill:red;stroke-width:1;stroke:red" />
+                            </svg>
+                        </td>
+                        <td>Late</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+<script>
+   $(document).ready(function() {
+        document.addEventListener('keydown', function (event) {
+          var esc = event.which == 27,
+              nl = event.which == 13,
+              el = event.target,
+              //input = el.nodeName != 'INPUT' && el.nodeName != 'TEXTAREA',
+              input = el.hasAttribute('contenteditable');
+              data = {};
+          //alert(el.nodeName); -- TD
+          if (input) {
+            if (esc) {
+              // restore state
+              document.execCommand('undo');
+              el.blur();
+            } else if (nl) {
+              // save
+              data[el.getAttribute('data-name')] = el.innerHTML;
+
+              // we could send an ajax request to update the field
+              $.ajax({
+                url: window.location.toString(),
+                data: data,
+                type: 'post',
+                success: function(result) {
+                    if ( result == "Fail") {
+                        alert('Invalid input - data not saved');
+                        el.innerHTML = initialvalue;
+                    }
+                }
+              });
+              log(JSON.stringify(data));
+              keypress = 0;
+
+              el.blur();
+              event.preventDefault();
+            } else { // Some other key pressed, if first key, save text
+              if (keypress == 0) {
+                log(el.innerHTML);
+                initialvalue = el.innerHTML;
+                keypress = 1;
+              };
+
+           };
+          }
+        }, true);
+    });
+function log(s) {
+  document.getElementById('debug').innerHTML = 'Updated: ' + s;
+}
+
+$("td").blur(function(event){
+    if (keypress == 1) {
+        el = event.target;
+        el.innerHTML = initialvalue;
+        keypress = 0;
+        initialvalue = '';
+        //alert("This input field has lost its focus.");
+    };
+});
+
+var initialvalue = '';
+var keypress = 0;
+
+</script>
+
+</body>
+</html>
